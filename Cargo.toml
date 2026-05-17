@@ -1,0 +1,22 @@
+[package]
+name = "leptos-markdoc"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/markdoc-rs/leptos-markdoc"
+description = "Leptos components that render Markdoc content"
+
+[lib]
+# Cargo derives the lib name from the package name; with a hyphen the
+# default would be `leptos_markdoc` — pin it explicitly so downstream
+# `use leptos_markdoc::…` keeps working without surprises.
+name = "leptos_markdoc"
+path = "src/lib.rs"
+
+[dependencies]
+markdoc       = "0.1.0"
+# Used to be workspace deps in the markdoc workspace. Pinned inline
+# now that this crate is standalone.
+leptos        = "0.8"
+leptos_meta   = "0.8"
+leptos_router = "0.8"

@@ -1,0 +1,60 @@
+# CI for leptos-markdoc
+#
+# Library crate. Depends on sibling `markdoc` via a relative
+# `path = "../markdoc"` reference, so CI checks out both repos
+# side-by-side before running cargo.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: short
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out leptos-markdoc
+        uses: actions/checkout@v4
+        with:
+          path: leptos-markdoc
+
+      - name: Check out sibling — markdoc
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/markdoc
+          path: markdoc
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cargo cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: leptos-markdoc
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: cargo fmt --check
+        working-directory: leptos-markdoc
+        run: cargo fmt --all --check
+
+      - name: cargo clippy
+        working-directory: leptos-markdoc
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: cargo test
+        working-directory: leptos-markdoc
+        run: cargo test --all-targets
+
+      - name: cargo check --examples
+        working-directory: leptos-markdoc
+        run: cargo check --examples
